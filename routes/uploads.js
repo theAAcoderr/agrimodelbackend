@@ -31,8 +31,29 @@ const upload = multer({
   }
 });
 
+// Multer error handler wrapper
+const handleMulterError = (uploadMiddleware) => {
+  return (req, res, next) => {
+    uploadMiddleware(req, res, (err) => {
+      if (err instanceof multer.MulterError) {
+        console.error('Multer error:', err);
+        return res.status(400).json({
+          error: `Upload error: ${err.message}`,
+          code: err.code
+        });
+      } else if (err) {
+        console.error('Upload middleware error:', err);
+        return res.status(500).json({
+          error: err.message || 'File upload failed'
+        });
+      }
+      next();
+    });
+  };
+};
+
 // Single file upload to S3
-router.post('/single', authenticateToken, upload.single('file'), async (req, res) => {
+router.post('/single', authenticateToken, handleMulterError(upload.single('file')), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
@@ -87,7 +108,7 @@ router.post('/single', authenticateToken, upload.single('file'), async (req, res
 });
 
 // Multiple files upload to S3
-router.post('/multiple', authenticateToken, upload.array('files', 10), async (req, res) => {
+router.post('/multiple', authenticateToken, handleMulterError(upload.array('files', 10)), async (req, res) => {
   try {
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ error: 'No files uploaded' });
