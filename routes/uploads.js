@@ -11,15 +11,33 @@ const storage = multer.memoryStorage();
 
 // File filter
 const fileFilter = (req, file, cb) => {
-  // Allow images, videos, audio, and documents
-  const allowedTypes = /jpeg|jpg|png|gif|mp4|avi|mov|mp3|wav|pdf|doc|docx|xls|xlsx|csv|json/;
-  const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-  const mimetype = allowedTypes.test(file.mimetype);
+  // Allowed MIME types
+  const allowedMimeTypes = [
+    // Images
+    'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/bmp',
+    // Videos
+    'video/mp4', 'video/avi', 'video/mov', 'video/quicktime', 'video/x-msvideo', 'video/webm',
+    // Audio
+    'audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/aac', 'audio/m4a', 'audio/ogg',
+    // Documents
+    'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'text/csv', 'application/json', 'text/plain'
+  ];
 
-  if (extname && mimetype) {
+  // Allowed extensions
+  const allowedExtensions = /\.(jpeg|jpg|png|gif|webp|bmp|mp4|avi|mov|mp3|wav|aac|m4a|ogg|pdf|doc|docx|xls|xlsx|csv|json|txt)$/i;
+
+  const extMatch = allowedExtensions.test(path.extname(file.originalname).toLowerCase());
+  const mimeMatch = allowedMimeTypes.includes(file.mimetype.toLowerCase());
+
+  console.log(`📎 File filter check: ${file.originalname}, mime: ${file.mimetype}, extMatch: ${extMatch}, mimeMatch: ${mimeMatch}`);
+
+  if (extMatch || mimeMatch) {
     cb(null, true);
   } else {
-    cb(new Error('Invalid file type. Only images, videos, audio, and documents allowed.'));
+    console.error(`❌ Rejected file: ${file.originalname}, mime: ${file.mimetype}`);
+    cb(new Error(`Invalid file type: ${file.mimetype}. Allowed: images, videos, audio, documents.`));
   }
 };
 
