@@ -54,8 +54,8 @@ const S3Service = {
         Bucket: s3Config.bucketName,
         Key: key,
         Body: file.buffer,
-        ContentType: file.mimetype,
-        ACL: 'public-read' // Make files publicly accessible
+        ContentType: file.mimetype
+        // Removed ACL: 'public-read' - bucket policy handles access
       };
 
       console.log(`📁 Uploading to S3: ${s3Config.bucketName}/${key}`);
