@@ -93,6 +93,22 @@ app.use('/admin-panel', adminPanelRoutes);
 // Static file serving for uploads
 app.use('/uploads', express.static('uploads'));
 
+// Root endpoint
+app.get('/', (req, res) => {
+  res.json({
+    message: 'AgriModel Backend API',
+    version: '1.0.0',
+    status: 'running',
+    endpoints: {
+      health: '/health',
+      auth: '/api/auth',
+      users: '/api/users',
+      colleges: '/api/colleges',
+      projects: '/api/projects'
+    }
+  });
+});
+
 // ==========================================
 // ERROR HANDLING
 // ==========================================
