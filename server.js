@@ -5,28 +5,38 @@ const compression = require('compression');
 const morgan = require('morgan');
 require('dotenv').config();
 
-const { testConnection } = require('./config/database');
-const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
+let testConnection, errorHandler, notFoundHandler;
+let healthRoutes, authRoutes, usersRoutes, collegesRoutes, projectsRoutes;
+let dataSubmissionsRoutes, mlModelsRoutes, sensorsRoutes, sensorReadingsRoutes;
+let communicationRoutes, researchDataRoutes, uploadsRoutes, reportsRoutes;
+let adminPanelRoutes, notificationsRoutes, analyticsRoutes, batchRoutes, searchRoutes;
 
-// Import routes
-const healthRoutes = require('./routes/health');
-const authRoutes = require('./routes/auth');
-const usersRoutes = require('./routes/users');
-const collegesRoutes = require('./routes/colleges');
-const projectsRoutes = require('./routes/projects');
-const dataSubmissionsRoutes = require('./routes/data-submissions');
-const mlModelsRoutes = require('./routes/ml-models');
-const sensorsRoutes = require('./routes/sensors');
-const sensorReadingsRoutes = require('./routes/sensor-readings');
-const communicationRoutes = require('./routes/communication');
-const researchDataRoutes = require('./routes/research-data');
-const uploadsRoutes = require('./routes/uploads');
-const reportsRoutes = require('./routes/reports');
-const adminPanelRoutes = require('./routes/admin-panel');
-const notificationsRoutes = require('./routes/notifications');
-const analyticsRoutes = require('./routes/analytics');
-const batchRoutes = require('./routes/batch');
-const searchRoutes = require('./routes/search');
+try {
+  ({ testConnection } = require('./config/database'));
+  ({ errorHandler, notFoundHandler } = require('./middleware/errorHandler'));
+
+  // Import routes
+  healthRoutes = require('./routes/health');
+  authRoutes = require('./routes/auth');
+  usersRoutes = require('./routes/users');
+  collegesRoutes = require('./routes/colleges');
+  projectsRoutes = require('./routes/projects');
+  dataSubmissionsRoutes = require('./routes/data-submissions');
+  mlModelsRoutes = require('./routes/ml-models');
+  sensorsRoutes = require('./routes/sensors');
+  sensorReadingsRoutes = require('./routes/sensor-readings');
+  communicationRoutes = require('./routes/communication');
+  researchDataRoutes = require('./routes/research-data');
+  uploadsRoutes = require('./routes/uploads');
+  reportsRoutes = require('./routes/reports');
+  adminPanelRoutes = require('./routes/admin-panel');
+  notificationsRoutes = require('./routes/notifications');
+  analyticsRoutes = require('./routes/analytics');
+  batchRoutes = require('./routes/batch');
+  searchRoutes = require('./routes/search');
+} catch (error) {
+  console.error('Error loading modules:', error);
+}
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -67,28 +77,28 @@ if (process.env.NODE_ENV === 'development') {
 // ==========================================
 
 // Health check routes
-app.use('/health', healthRoutes);
+if (healthRoutes) app.use('/health', healthRoutes);
 
 // API routes
-app.use('/api/auth', authRoutes);
-app.use('/api/users', usersRoutes);
-app.use('/api/colleges', collegesRoutes);
-app.use('/api/projects', projectsRoutes);
-app.use('/api/data-submissions', dataSubmissionsRoutes);
-app.use('/api/ml-models', mlModelsRoutes);
-app.use('/api/sensors', sensorsRoutes);
-app.use('/api/sensor-readings', sensorReadingsRoutes);
-app.use('/api/communication', communicationRoutes);
-app.use('/api/research-data', researchDataRoutes);
-app.use('/api/uploads', uploadsRoutes);
-app.use('/api/reports', reportsRoutes);
-app.use('/api/notifications', notificationsRoutes);
-app.use('/api/analytics', analyticsRoutes);
-app.use('/api/batch', batchRoutes);
-app.use('/api/search', searchRoutes);
+if (authRoutes) app.use('/api/auth', authRoutes);
+if (usersRoutes) app.use('/api/users', usersRoutes);
+if (collegesRoutes) app.use('/api/colleges', collegesRoutes);
+if (projectsRoutes) app.use('/api/projects', projectsRoutes);
+if (dataSubmissionsRoutes) app.use('/api/data-submissions', dataSubmissionsRoutes);
+if (mlModelsRoutes) app.use('/api/ml-models', mlModelsRoutes);
+if (sensorsRoutes) app.use('/api/sensors', sensorsRoutes);
+if (sensorReadingsRoutes) app.use('/api/sensor-readings', sensorReadingsRoutes);
+if (communicationRoutes) app.use('/api/communication', communicationRoutes);
+if (researchDataRoutes) app.use('/api/research-data', researchDataRoutes);
+if (uploadsRoutes) app.use('/api/uploads', uploadsRoutes);
+if (reportsRoutes) app.use('/api/reports', reportsRoutes);
+if (notificationsRoutes) app.use('/api/notifications', notificationsRoutes);
+if (analyticsRoutes) app.use('/api/analytics', analyticsRoutes);
+if (batchRoutes) app.use('/api/batch', batchRoutes);
+if (searchRoutes) app.use('/api/search', searchRoutes);
 
 // Admin Panel (Database Viewer)
-app.use('/admin-panel', adminPanelRoutes);
+if (adminPanelRoutes) app.use('/admin-panel', adminPanelRoutes);
 
 // Static file serving for uploads
 app.use('/uploads', express.static('uploads'));
@@ -114,10 +124,23 @@ app.get('/', (req, res) => {
 // ==========================================
 
 // 404 handler
-app.use(notFoundHandler);
+if (notFoundHandler) {
+  app.use(notFoundHandler);
+} else {
+  app.use((req, res) => {
+    res.status(404).json({ error: 'Route not found', path: req.originalUrl });
+  });
+}
 
 // Global error handler
-app.use(errorHandler);
+if (errorHandler) {
+  app.use(errorHandler);
+} else {
+  app.use((err, req, res, next) => {
+    console.error('Error:', err);
+    res.status(500).json({ error: err.message || 'Internal server error' });
+  });
+}
 
 // ==========================================
 // SERVER STARTUP
