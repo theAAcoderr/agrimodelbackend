@@ -70,6 +70,20 @@ PORT=3000
 NODE_ENV=development
 ```
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ⚠️ **Important:** Change `JWT_SECRET` to a strong random string in production!
 
 ### Step 3: Run Database Migration
