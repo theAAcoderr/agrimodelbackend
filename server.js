@@ -163,6 +163,11 @@ process.on('SIGTERM', () => {
   process.exit(0);
 });
 
-// Start the server
-startServer();
+// Start the server (only when not in Vercel serverless environment)
+if (process.env.VERCEL !== '1') {
+  startServer();
+}
+
+// Export for Vercel serverless
+module.exports = app;
 
